@@ -1,0 +1,169 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #06080d;
+  --panel: #0d1220;
+  --panel-edge: #1c2740;
+  --text: #c9d4e8;
+  --dim: #6b7a96;
+  --gold: #d4a94f;
+  --red: #c0392b;
+  --cyan: #4fc3d4;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+#app { width: 1024px; max-width: 100vw; padding: 12px; }
+
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+#civ-info { color: var(--gold); font-weight: bold; letter-spacing: 1px; }
+#year-info { color: var(--dim); }
+
+#climate-banner {
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.climate-stable  { background: #14401f; color: #7ee08a; }
+.climate-mild    { background: #2e3a1e; color: #c8d97e; }
+.climate-cold    { background: #16314a; color: #7ec3e0; }
+.climate-frigid  { background: #1a2452; color: #8fa0ff; }
+.climate-deepfreeze { background: #251a52; color: #b59fff; }
+.climate-hot     { background: #4a2e16; color: #e0b27e; }
+.climate-scorch  { background: #4a1c16; color: #e08a7e; }
+.climate-doom    { background: #5c0e0e; color: #ff6b5e; animation: pulse 0.8s infinite alternate; }
+@keyframes pulse { from { filter: brightness(1); } to { filter: brightness(1.6); } }
+
+#layout { display: flex; gap: 10px; }
+#left-col { flex: 0 0 640px; display: flex; flex-direction: column; gap: 10px; }
+#right-col { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+#sky {
+  background: #02030a;
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  display: block;
+}
+
+#forecast {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.forecast-label { color: var(--dim); white-space: nowrap; }
+#forecast-strip { display: flex; gap: 6px; flex: 1; }
+.fc-cell {
+  flex: 1;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 4px;
+  font-size: 13px;
+  border: 1px solid var(--panel-edge);
+}
+.fc-unknown { background: #10131c; color: #3d465c; }
+
+#stats {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 18px;
+}
+.stat { display: flex; justify-content: space-between; gap: 8px; }
+.stat-name { color: var(--dim); white-space: nowrap; }
+.stat span:last-child { text-align: right; }
+#stat-hydra.dehydrated { color: var(--cyan); }
+
+#actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.act {
+  padding: 12px 4px;
+  background: #131b30;
+  color: var(--text);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.act:hover:not(:disabled) { background: #1d2a4a; border-color: var(--gold); }
+.act:disabled { opacity: 0.35; cursor: not-allowed; }
+
+#log {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  padding: 10px 12px;
+  overflow-y: auto;
+  min-height: 180px;
+  max-height: 320px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.log-entry { color: var(--text); }
+.log-entry .log-year { color: var(--dim); margin-right: 6px; }
+.log-danger { color: #ff8a7e; }
+.log-good { color: #8ae09a; }
+.log-system { color: var(--gold); }
+
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 3, 8, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#modal.hidden { display: none; }
+#modal-box {
+  width: 460px;
+  background: var(--panel);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 28px;
+  text-align: center;
+}
+#modal-title { color: var(--gold); margin-bottom: 14px; letter-spacing: 4px; }
+#modal-text { line-height: 1.9; margin-bottom: 20px; white-space: pre-line; }
+#modal-btn {
+  padding: 10px 26px;
+  background: #2a1f0a;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 2px;
+}
+#modal-btn:hover { background: #3d2d0e; }

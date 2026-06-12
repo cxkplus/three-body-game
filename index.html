@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>三体：文明纪元</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div id="civ-info">第 ? 号文明 · 石器时代</div>
+    <div id="year-info">三体历 0 年</div>
+    <div id="climate-banner" class="climate-mild">——</div>
+  </header>
+
+  <main id="layout">
+    <section id="left-col">
+      <canvas id="sky" width="640" height="420"></canvas>
+      <div id="forecast">
+        <span class="forecast-label">天象预报</span>
+        <div id="forecast-strip"></div>
+      </div>
+    </section>
+
+    <section id="right-col">
+      <div id="stats">
+        <div class="stat"><span class="stat-name">人口</span><span id="stat-pop">10 万</span></div>
+        <div class="stat"><span class="stat-name">粮食</span><span id="stat-food">50</span></div>
+        <div class="stat"><span class="stat-name">科技</span><span id="stat-sci">0</span></div>
+        <div class="stat"><span class="stat-name">观测台</span><span id="stat-obs">Lv 0</span></div>
+        <div class="stat"><span class="stat-name">状态</span><span id="stat-hydra">含水</span></div>
+        <div class="stat"><span class="stat-name">星舰计划</span><span id="stat-ship">未解锁</span></div>
+      </div>
+
+      <div id="actions">
+        <button id="act-farm" class="act" title="粮食 += 人口×1.0×时代倍率×气候系数">🌾 耕作</button>
+        <button id="act-research" class="act" title="科技 += 人口×0.6×时代倍率">🔬 研究</button>
+        <button id="act-breed" class="act" title="人口增长12%×气候系数，额外消耗粮食">👥 繁衍</button>
+        <button id="act-observe" class="act" title="提升观测台等级，预报看得更远">🔭 建观测台</button>
+        <button id="act-dehydrate" class="act" title="全民脱水：免疫多数灾害，但无产出">💧 全民脱水</button>
+        <button id="act-wait" class="act" title="什么都不做，让时间流逝。脱水状态下熬过灾难的唯一手段">⏳ 静待</button>
+        <button id="act-ship" class="act" title="太空时代解锁：投入3次即胜利">🚀 星舰计划</button>
+      </div>
+
+      <div id="log"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="hidden">
+    <div id="modal-box">
+      <h2 id="modal-title">文明毁灭</h2>
+      <p id="modal-text"></p>
+      <button id="modal-btn">文明将重新启动</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/physics.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
