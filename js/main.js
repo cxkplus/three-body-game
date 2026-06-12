@@ -2,13 +2,22 @@
 (function () {
   var st;
 
+  function afterAction() {
+    if (st.lastRound && st.lastRound.frames) {
+      TB.UI.animateRound(st.lastRound.frames);
+    }
+    TB.UI.render(st);
+    if (st.over || st.won) {
+      setTimeout(checkEnd, 950); // 等天象动画播完再揭晓命运
+    }
+  }
+
   function bind(id, action) {
     document.getElementById(id).addEventListener('click', function () {
       if (st.over || st.won) return;
       var ok = TB.Game.doAction(st, action);
       if (!ok) return;
-      TB.UI.render(st);
-      checkEnd();
+      afterAction();
     });
   }
 
@@ -52,7 +61,7 @@
   // 调试/测试接口（不影响正常游玩）
   window.__tb = {
     get state() { return st; },
-    act: function (a) { var ok = TB.Game.doAction(st, a); TB.UI.render(st); checkEnd(); return ok; },
+    act: function (a) { var ok = TB.Game.doAction(st, a); TB.UI.render(st); if (st.over || st.won) checkEnd(); return ok; },
     rebirth: function () { if (st.over) { TB.Game.rebirth(st); TB.UI.hideModal(); TB.UI.render(st); } }
   };
 

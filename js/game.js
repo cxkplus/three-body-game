@@ -42,6 +42,40 @@ TB.Game = (function () {
     mild: 0.995, cold: 0.995, frigid: 0.99, deepfreeze: 0.985
   };
 
+  /* 执政顾问：原著「三体游戏」中登场的名士，每号文明随机降临一位 */
+  var ADVISORS = [
+    { name: '周文王', title: '卦象推演者', fx: { forecastPlus: 1 },
+      desc: '预报视野 +1 格',
+      quote: '亢龙有悔，潜龙勿用。给我一只龟甲，我能算出太阳的轨迹。' },
+    { name: '伏羲', title: '祭日者', fx: { dryLossHalf: true },
+      desc: '脱水期间的人口损耗减半',
+      quote: '太阳是喜怒无常的神。让蛰伏的子民安睡，我为他们守夜。' },
+    { name: '墨子', title: '观天巨匠', fx: { obsCostHalf: true },
+      desc: '建观测台费用减半',
+      quote: '我造了一台机器，它能精确记录太阳的运行。' },
+    { name: '秦始皇', title: '人列计算机之主', fx: { researchMult: 1.3 },
+      desc: '研究产出 +30%',
+      quote: '三千万士兵，就是三千万个门部件——计算阵列，运行！' },
+    { name: '哥白尼', title: '揭示真相者', fx: { doomSurvive: 0.4 },
+      desc: '烈日凌空时深藏存活率翻倍',
+      quote: '这个世界有三个太阳。一切灾难，皆是它们无序的舞蹈。' },
+    { name: '牛顿', title: '万有引力使者', fx: { alignHalf: true },
+      desc: '三星连珠的潮汐伤害减半',
+      quote: '是引力，支配着三颗太阳的疯狂之舞。' },
+    { name: '爱因斯坦', title: '理论之光', fx: { inherit: 0.85 },
+      desc: '文明毁灭时科技继承 75%→85%',
+      quote: '文明会化为灰烬，但定律永存。' },
+    { name: '冯·诺依曼', title: '计算架构师', fx: { obsSci: 3 },
+      desc: '每回合额外科技 = 观测台等级×3',
+      quote: '只要阵列还在运转，计算就永不停歇。' }
+  ];
+
+  function pickAdvisor(st) {
+    var a = ADVISORS[Math.floor(Math.random() * ADVISORS.length)];
+    st.advisor = a;
+    log(st, a.name + '（' + a.title + '）来到了这个文明。「' + a.quote + '」', 'log-system');
+  }
+
   var DESTROY_TEXTS = {
     doom:    '三日凌空。行星表面化为熔炉，岩石燃烧，海洋蒸腾。',
     inferno: '凌空的烈日烤焦了大地，文明在烈焰中化为灰烬。',
@@ -93,7 +127,7 @@ TB.Game = (function () {
   }
 
   function newState() {
-    return {
+    var st = {
       civ: 137 + Math.floor(Math.random() * 31),
       year: 0,
       pop: 10,
@@ -108,6 +142,8 @@ TB.Game = (function () {
       won: false,
       log: []
     };
+    pickAdvisor(st);
+    return st;
   }
 
   function log(st, msg, kind) {
@@ -120,7 +156,7 @@ TB.Game = (function () {
   /* 文明毁灭 → 轮回。reason 是 DESTROY_TEXTS 的 key。 */
   function destroy(st, reason) {
     var era = eraOf(st.sci);
-    var inherited = Math.floor(st.sci * 0.75);
+    var inherited = Math.floor(st.sci * (st.advisor.fx.inherit || 0.75));
     st.over = true;
     st.pendingRebirth = {
       text: DESTROY_TEXTS[reason] +
@@ -149,6 +185,13 @@ TB.Game = (function () {
       log(st, '新的星系轮回开始了。三颗太阳在虚空中重新就位。', 'log-system');
     }
     log(st, '第 ' + st.civ + ' 号文明在一片废墟上诞生了。', 'log-system');
+    pickAdvisor(st);
+  }
+
+  /* 观测台造价（受墨子效果影响） */
+  function obsCost(st) {
+    var c = 30 * (st.obs + 1);
+    return st.advisor.fx.obsCostHalf ? Math.ceil(c / 2) : c;
   }
 
   /* 执行玩家行动。返回 false 表示行动无效（不消耗回合）。 */
@@ -165,7 +208,7 @@ TB.Game = (function () {
         break;
       case 'observe':
         if (st.dehydrated) return false;
-        var cost = 30 * (st.obs + 1);
+        var cost = obsCost(st);
         if (st.obs >= 6 || st.food < cost) return false;
         st.food -= cost;
         st.obs += 1;
@@ -234,7 +277,7 @@ TB.Game = (function () {
     // 脱水者中有 5% 深藏地窟得以幸存——预报+脱水是唯一的活路
     if (round.avgT >= 800 || round.maxT >= 1600) {
       if (!st.dehydrated) { destroy(st, 'doom'); return; }
-      st.pop *= 0.2;
+      st.pop *= (st.advisor.fx.doomSurvive || 0.2);
       st.food *= 0.5;
       log(st, '烈日凌空！行星表面化为熔炉，唯有深藏地窟的脱水体免于焚毁。', 'log-danger');
       if (st.pop < 0.5) { destroy(st, 'doom'); }
@@ -244,7 +287,9 @@ TB.Game = (function () {
 
     var prodFactor = 0;
     if (st.dehydrated) {
-      st.pop *= DRY_SURVIVE[cli.key];
+      var survive = DRY_SURVIVE[cli.key];
+      if (st.advisor.fx.dryLossHalf) survive = 1 - (1 - survive) / 2;
+      st.pop *= survive;
       // 守夜学者：少数保持含水的值守者以 10% 速率延续研究
       st.sci += st.pop * 0.12 * era.mult;
       if (cli.key === 'inferno') {
@@ -269,8 +314,13 @@ TB.Game = (function () {
 
     // 三星连珠
     if (round.alignment && st.pop > 0) {
-      st.pop *= 0.85;
+      st.pop *= st.advisor.fx.alignHalf ? 0.925 : 0.85;
       log(st, '三星连珠！潮汐力撕扯着大地，山脉在引力中升起又崩塌。', 'log-danger');
+    }
+
+    // 冯·诺依曼的计算阵列：每回合产出 观测台等级×3 科技
+    if (st.advisor.fx.obsSci && st.obs > 0) {
+      st.sci += st.obs * st.advisor.fx.obsSci;
     }
 
     // 飞星预兆（纯演出）
@@ -289,7 +339,7 @@ TB.Game = (function () {
         if (gain > 0) log(st, '收获了 ' + fmt(gain) + ' 单位粮食。', '');
         else log(st, '严酷的气候里颗粒无收。', '');
       } else if (info.action === 'research') {
-        var sgain = st.pop * 1.5 * era.mult * Math.max(climateF, 0.5);
+        var sgain = st.pop * 1.5 * era.mult * Math.max(climateF, 0.5) * (st.advisor.fx.researchMult || 1);
         var prevEra = era.name;
         st.sci += sgain;
         log(st, '学者们积累了 ' + fmt(sgain) + ' 点科技。', '');
@@ -339,7 +389,7 @@ TB.Game = (function () {
 
   /* 预报数据：观测台等级决定可见回合数（1+obs），其余为未知 */
   function getForecast(st, totalCells) {
-    var visible = Math.min(1 + st.obs, totalCells);
+    var visible = Math.min(1 + st.obs + (st.advisor.fx.forecastPlus || 0), totalCells);
     var rounds = TB.Physics.forecast(st.sys, visible);
     var out = [];
     for (var i = 0; i < totalCells; i++) {
@@ -361,6 +411,7 @@ TB.Game = (function () {
     getForecast: getForecast,
     eraOf: eraOf,
     classify: classify,
+    obsCost: obsCost,
     ERAS: ERAS
   };
 })();

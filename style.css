@@ -97,6 +97,7 @@ body {
 .stat-name { color: var(--dim); white-space: nowrap; }
 .stat span:last-child { text-align: right; }
 #stat-hydra.dehydrated { color: var(--cyan); }
+#stat-advisor { color: var(--gold); cursor: help; border-bottom: 1px dotted var(--gold); }
 
 #actions {
   display: grid;

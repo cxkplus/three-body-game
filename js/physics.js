@@ -127,10 +127,21 @@ TB.Physics = (function () {
     return cross / (lenA * lenB) < 0.06 && span < 5 && minSunDist(sys) < 4;
   }
 
-  /* 推进一个回合，返回该回合的气候摘要 */
+  function relSky(sys) {
+    return sys.suns.map(function (s) {
+      var dx = s.x - sys.planet.x;
+      var dy = s.y - sys.planet.y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      return { d: d, angle: Math.atan2(dy, dx), flying: d > 6 };
+    });
+  }
+
+  /* 推进一个回合，返回该回合的气候摘要。
+   * frames 记录回合内 25 个天象关键帧，供 UI 平滑动画。 */
   function advanceRound(sys) {
     var maxT = -Infinity, minT = Infinity, sumT = 0;
     var engulfed = false, minD = Infinity;
+    var frames = [];
     for (var i = 0; i < STEPS_PER_ROUND; i++) {
       step(sys);
       var t = temperature(sys);
@@ -140,6 +151,9 @@ TB.Physics = (function () {
       var d = minSunDist(sys);
       if (d < minD) minD = d;
       if (d < 0.008) engulfed = true;
+      if (i % 16 === 0 || i === STEPS_PER_ROUND - 1) {
+        frames.push({ suns: relSky(sys), t: t });
+      }
     }
     if (minD > 25) sys.ejectRounds++;
     else sys.ejectRounds = 0;
@@ -149,7 +163,8 @@ TB.Physics = (function () {
       minT: minT,
       engulfed: engulfed,
       ejected: sys.ejectRounds >= 12,
-      alignment: isAlignment(sys)
+      alignment: isAlignment(sys),
+      frames: frames
     };
   }
 
@@ -172,12 +187,7 @@ TB.Physics = (function () {
 
   /* 太阳的视觉信息：距离决定大小，>6 视为飞星 */
   function skyInfo(sys) {
-    return sys.suns.map(function (s) {
-      var dx = s.x - sys.planet.x;
-      var dy = s.y - sys.planet.y;
-      var d = Math.sqrt(dx * dx + dy * dy);
-      return { d: d, angle: Math.atan2(dy, dx), flying: d > 6 };
-    });
+    return relSky(sys);
   }
 
   return {
