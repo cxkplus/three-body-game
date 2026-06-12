@@ -15,7 +15,10 @@
   <header id="topbar">
     <div id="civ-info">第 ? 号文明 · 石器时代</div>
     <div id="year-info">三体历 0 年</div>
-    <div id="climate-banner" class="climate-mild">——</div>
+    <div id="topbar-right">
+      <button id="chronicle-btn" title="历代文明的命运记录">📜 史册</button>
+      <div id="climate-banner" class="climate-mild">——</div>
+    </div>
   </header>
 
   <main id="layout">
@@ -56,13 +59,31 @@
     <div id="modal-box">
       <h2 id="modal-title">文明毁灭</h2>
       <p id="modal-text"></p>
-      <button id="modal-btn">文明将重新启动</button>
+      <div class="modal-actions">
+        <button id="modal-card-btn" class="ghost-btn">🖼 保存战绩卡片</button>
+        <button id="modal-btn">文明将重新启动</button>
+      </div>
+    </div>
+  </div>
+
+  <footer id="credit">
+    灵感与世界观源自 <strong>刘慈欣《三体》</strong>（重庆出版社）· 本游戏为粉丝同人作品，非商业、与原作者及出版方无关 ·
+    <a href="https://github.com/cxkplus/three-body-game" target="_blank" rel="noopener">源码</a>
+  </footer>
+
+  <div id="chronicle" class="hidden">
+    <div id="chronicle-box">
+      <h2>文 明 史 册</h2>
+      <div id="chronicle-stats"></div>
+      <div id="chronicle-list"></div>
+      <button id="chronicle-close">合上史册</button>
     </div>
   </div>
 </div>
 
 <script src="js/physics.js"></script>
 <script src="js/game.js"></script>
+<script src="js/chronicle.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
 </body>

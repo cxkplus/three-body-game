@@ -130,6 +130,7 @@ TB.Game = (function () {
     var st = {
       civ: 137 + Math.floor(Math.random() * 31),
       year: 0,
+      civStart: 0,       // 当前文明的诞生纪年（算存续年数用）
       pop: 10,
       food: 50,
       sci: 0,
@@ -157,10 +158,14 @@ TB.Game = (function () {
   function destroy(st, reason) {
     var era = eraOf(st.sci);
     var inherited = Math.floor(st.sci * (st.advisor.fx.inherit || 0.75));
+    var lived = st.year - st.civStart;
     st.over = true;
     st.pendingRebirth = {
+      reasonKey: reason,
+      lived: lived,
+      eraName: era.name,
       text: DESTROY_TEXTS[reason] +
-        '\n\n第 ' + st.civ + ' 号文明在持续了 ' + st.year + ' 年后毁灭了。该文明进化至' + era.name + '。' +
+        '\n\n第 ' + st.civ + ' 号文明在持续了 ' + lived + ' 年后毁灭了。该文明进化至' + era.name + '。' +
         '\n\n文明的种子仍在，它将重新启动，再次开始在三体世界中命运莫测的进化。' +
         (inherited > 0 ? '\n（上一文明的遗迹将传承 ' + inherited + ' 点科技）' : ''),
       inherited: inherited,
@@ -171,6 +176,7 @@ TB.Game = (function () {
   function rebirth(st) {
     var p = st.pendingRebirth;
     st.civ += 1;
+    st.civStart = st.year;
     st.pop = 10;
     st.food = 50;
     st.sci = p.inherited;
